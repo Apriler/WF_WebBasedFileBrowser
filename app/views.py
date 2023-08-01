@@ -75,7 +75,7 @@ def main(req):
     jsonObj=json.load(json_f)
     rootpath=jsonObj["rootpath"]
     Folder = Utils.Folder(rootpath)
-    dataJson = Folder.getFolderJson()
+    dataJson = Folder.getRootFolderJson()
     language=req.COOKIES.get('language')
 
     if language=="en":

@@ -5,7 +5,7 @@ from django.http import HttpResponse, Http404, FileResponse
 from django.utils.encoding import escape_uri_path
 import tempfile, zipfile
 from wsgiref.util import FileWrapper
-
+import psutil
 
 class Folder:
     def __init__(self, path):
@@ -29,8 +29,36 @@ class Folder:
             currentDict = {"name": os.path.basename(path)+" Error"+repr(e), "open": False, "path": path}
             return currentDict
 
+    def get_windows_drives(self):
+        drives = []
+        for drive in psutil.disk_partitions():
+            if 'cdrom' in drive.opts or drive.fstype == '':
+                continue
+            drives.append(drive.device)
+        return drives
+
     def getFolderJson(self):
         return json.dumps(self.__getFolderDict(self.path))
+    def getRootFolderJson(self):
+        return json.dumps(self.__getRootFolderDict())
+
+    def __getRootFolderDict(self):
+        try:
+            # os.chdir(path)
+            content = self.get_windows_drives()
+            # currentDict = {"name": os.path.basename(path), "open": False, "path": path}
+            children = []
+            for i in content:
+                if os.path.isdir(i):
+                    children.append({"name": i, "path": i, "isParent": "true"})
+            # for i in content:
+            #     if not os.path.isdir(i):
+            #         children.append({"name": i, "path": path + "/" + i})
+            # currentDict["children"] = children
+            return children
+        except Exception as e:
+            currentDict = {"name": os.path.basename(path)+" Error"+repr(e), "open": False, "path": path}
+            return currentDict
 
 
 class fileOperator:
